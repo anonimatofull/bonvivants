@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="bonvivants - IP adress CGNAT">
+  <title>bonvivants</title>
+
+  <style>
+    :root {
+      --purple: #a855f7;
+      --purple-light: #c084fc;
+      --purple-dark: #7e22ce;
+      --black: #030006;
+      --white: #f7f2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--black);
+      color: var(--white);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 18px;
+      overflow-x: hidden;
+      position: relative;
+      background:
+        linear-gradient(
+          rgba(2, 0, 5, 0.34),
+          rgba(2, 0, 5, 0.54)
+        ),
+        url("background.png") center center / cover no-repeat fixed;
+    }
+
+    /* Dark vignette, while keeping the central image visible */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at 50% 38%,
+          rgba(103, 38, 157, 0.10) 0%,
+          rgba(0, 0, 0, 0.05) 38%,
+          rgba(0, 0, 0, 0.60) 100%
+        );
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: min(570px, 100%);
+      text-align: center;
+    }
+
+    .emblem {
+      width: clamp(145px, 28vw, 205px);
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+      margin: 0 auto -38px;
+      position: relative;
+      z-index: 3;
+      opacity: 0;
+      transform: translateY(12px) scale(.96);
+      animation: emblemIn .8s ease forwards;
+      filter:
+        drop-shadow(0 0 7px rgba(168, 85, 247, .95))
+        drop-shadow(0 0 26px rgba(126, 34, 206, .50));
+      /* The original image already contains the emblem.
+         This transparent overlay is intentionally omitted on the live page. */
+      display: none;
+    }
+
+    .card {
+      position: relative;
+      padding: 42px 30px 34px;
+      border: 1px solid rgba(192, 132, 252, .52);
+      border-radius: 24px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(12, 5, 19, .88),
+          rgba(3, 1, 7, .91)
+        );
+      box-shadow:
+        0 0 0 1px rgba(168, 85, 247, .06),
+        0 0 35px rgba(126, 34, 206, .20),
+        inset 0 0 35px rgba(168, 85, 247, .035);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      opacity: 0;
+      transform: translateY(18px);
+      animation: cardIn .8s .08s ease forwards;
+    }
+
+    .brand {
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(35px, 8vw, 54px);
+      font-weight: 300;
+      letter-spacing: 9px;
+      line-height: 1;
+      text-transform: lowercase;
+      text-shadow: 0 0 22px rgba(168, 85, 247, .22);
+    }
+
+    .line {
+      height: 1px;
+      width: 72%;
+      margin: 28px auto 25px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(168, 85, 247, .80),
+        transparent
+      );
+      position: relative;
+    }
+
+    .line::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--purple);
+      box-shadow: 0 0 12px var(--purple);
+    }
+
+    .label {
+      margin-bottom: 14px;
+      color: var(--purple-light);
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: lowercase;
+    }
+
+    .ip-box {
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 15px;
+      border: 1px solid rgba(168, 85, 247, .62);
+      border-radius: 13px;
+      background: rgba(0, 0, 0, .36);
+      box-shadow:
+        inset 0 0 25px rgba(126, 34, 206, .08),
+        0 0 18px rgba(126, 34, 206, .08);
+    }
+
+    #ip {
+      color: var(--purple-light);
+      font-size: clamp(28px, 7vw, 43px);
+      font-weight: 500;
+      letter-spacing: 2px;
+      word-break: break-all;
+      text-shadow:
+        0 0 10px rgba(168, 85, 247, .78),
+        0 0 26px rgba(126, 34, 206, .34);
+    }
+
+    .status {
+      margin-top: 25px;
+      color: #d8b4fe;
+      font-size: 13px;
+      letter-spacing: 1px;
+      opacity: .82;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 8px;
+      border-radius: 50%;
+      vertical-align: 1px;
+      background: var(--purple);
+      box-shadow: 0 0 10px var(--purple);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes cardIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes emblemIn {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: .35; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        background-attachment: scroll;
+        padding: 20px 13px;
+      }
+
+      .card {
+        padding: 34px 18px 28px;
+        border-radius: 19px;
+      }
+
+      .brand {
+        letter-spacing: 6px;
+      }
+
+      .line {
+        width: 82%;
+        margin: 23px auto 22px;
+      }
+
+      .label {
+        font-size: 13px;
+        letter-spacing: 2px;
+      }
+
+      .ip-box {
+        min-height: 82px;
+      }
+
+      #ip {
+        letter-spacing: 1px;
+      }
+    }
+  </style>
+</head>
